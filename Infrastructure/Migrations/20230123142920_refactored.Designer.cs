@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230123142920_refactored")]
+    partial class refactored
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,46 +50,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Attendances");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Classroom", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Grade")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Section")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("TeacherId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TeacherId");
-
-                    b.ToTable("Classrooms");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ClassroomStudent", b =>
-                {
-                    b.Property<int>("StudentId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ClassroomId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("StudentId", "ClassroomId");
-
-                    b.HasIndex("ClassroomId");
-
-                    b.ToTable("ClassroomStudents");
                 });
 
             modelBuilder.Entity("Domain.Entities.Exam", b =>
@@ -240,26 +203,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("Subject");
                 });
 
-            modelBuilder.Entity("Domain.Entities.SubjectTimetable", b =>
-                {
-                    b.Property<int>("ClassroomId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TimetableId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SubjectId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ClassroomId", "TimetableId", "SubjectId");
-
-                    b.HasIndex("SubjectId");
-
-                    b.HasIndex("TimetableId");
-
-                    b.ToTable("SubjectTimetables");
-                });
-
             modelBuilder.Entity("Domain.Entities.Teacher", b =>
                 {
                     b.Property<int>("Id")
@@ -306,33 +249,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("Teachers");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TimeTable", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("DayOfWeek")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("EndTime")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("StartTime")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("id");
-
-                    b.ToTable("TimeTables");
-                });
-
             modelBuilder.Entity("Domain.Entities.Attendance", b =>
                 {
                     b.HasOne("Domain.Entities.Student", "Student")
@@ -350,32 +266,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Student");
 
                     b.Navigation("Teacher");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Classroom", b =>
-                {
-                    b.HasOne("Domain.Entities.Teacher", null)
-                        .WithMany("Classrooms")
-                        .HasForeignKey("TeacherId");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ClassroomStudent", b =>
-                {
-                    b.HasOne("Domain.Entities.Classroom", "Classroom")
-                        .WithMany()
-                        .HasForeignKey("ClassroomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Student", "Student")
-                        .WithMany("ClassroomStudents")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Classroom");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Domain.Entities.Exam", b =>
@@ -419,38 +309,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("Domain.Entities.SubjectTimetable", b =>
-                {
-                    b.HasOne("Domain.Entities.Classroom", "Classroom")
-                        .WithMany("SubjectTimetables")
-                        .HasForeignKey("ClassroomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Subject", "Subject")
-                        .WithMany("SubjectTimetables")
-                        .HasForeignKey("SubjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.TimeTable", "TimeTable")
-                        .WithMany("SubjectTimetables")
-                        .HasForeignKey("TimetableId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Classroom");
-
-                    b.Navigation("Subject");
-
-                    b.Navigation("TimeTable");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Classroom", b =>
-                {
-                    b.Navigation("SubjectTimetables");
-                });
-
             modelBuilder.Entity("Domain.Entities.Exam", b =>
                 {
                     b.Navigation("Results");
@@ -460,8 +318,6 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("Attendances");
 
-                    b.Navigation("ClassroomStudents");
-
                     b.Navigation("Issues");
 
                     b.Navigation("examResults");
@@ -470,20 +326,11 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Subject", b =>
                 {
                     b.Navigation("Exams");
-
-                    b.Navigation("SubjectTimetables");
                 });
 
             modelBuilder.Entity("Domain.Entities.Teacher", b =>
                 {
                     b.Navigation("Attendances");
-
-                    b.Navigation("Classrooms");
-                });
-
-            modelBuilder.Entity("Domain.Entities.TimeTable", b =>
-                {
-                    b.Navigation("SubjectTimetables");
                 });
 #pragma warning restore 612, 618
         }
